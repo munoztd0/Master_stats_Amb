@@ -1,0 +1,4 @@
+"0","#check correlation"
+"0","base_clean %>%"
+"0","  keep(is.numeric) %>%"
+"0","  ggcorr(palette = ""RdBu"", label = TRUE)"

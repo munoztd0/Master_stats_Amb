@@ -1,0 +1,45 @@
+#checker negatif climat
+#Profession et genre ?  rajouter profession dans models
+setiment negatif  
+
+% d'enlever
+
+#enlever < 3000 time
+
+time   "13288", "13570" "13006" "10930" "12811"
+straigt lining 10945 13627
+
+#outlier model 
+
+"12556", "12775"
+
+#straight lining ? par rapport a quel items?
+  "Reccomend"       "ProbabilitéACHAT" "EcologiqueEVAL"    "negatif_cilmat"   "positif_cilmat"   "Comp_Enviro"     
+
+
+#beaucoup de gens disent "Il est difficile de répondre à ces question quand on habite encore chez nos parents et que ce n'est pas nous qui choisissons quoi acheter pour la maison etc." 
+
+#Q10.1 = Decision mode: Pensez au moment où vous prenez une décision.      De manière générale, avez-vous tendance à décider assez rapidement en vous appuyant principalement sur votre intuition ou plutôt à réfléchir avec précision à toutes les alternatives possibl"
+
+# "Q12.1" = "Avez-vous des sentiments négatifs à propos du réchauffement climatique?">Avez-vous des sentiments négatifs à propos du réchauffement climatique?
+# "Q12.2" = "Avez-vous des sentiments posotifs à propos du réchauffement climatique?">Avez-vous des sentiments négatifs à propos du réchauffement climatique?
+
+#ComportementEnvironmental = MOYENNE (q13)
+
+#Q14.2 AGE
+
+#Q14.3 Genre "quest ci est quoi ?
+
+#Q14.4 Profession (quoi est quoi?)
+
+#Q14.5 commentaires
+
+
+#tu veux quon regarde la justesse des reponses?
+#"Q9.1" - Connaissiez-vous la marque de l'ampoule led présentée?">Connaissiez-vous la marque de l'ampoule led présentée?
+
+abels:
+ value                                                                label
+     1               Je décide très rapidement sur la base de mon intuition
+     2 Je me base en partie sur ma réflexion et en partie sur mon intuition
+     3                       Je prends le temps de réfléchir avec précision

@@ -1,0 +1,2 @@
+"0",""
+"0","densityPlot(base_clean$Price, g = base_clean$Product) # by product"

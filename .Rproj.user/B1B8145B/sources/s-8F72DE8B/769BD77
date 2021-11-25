@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1637862657931.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2034699708",
+    "id" : "769BD77",
+    "lastKnownWriteTime" : 1637867836,
+    "last_content_update" : 1637867836664,
+    "path" : "~/Desktop/Drive/Ambroise/clean.R",
+    "project_path" : "clean.R",
+    "properties" : {
+        "cursorPosition" : "15,120",
+        "scrollLine" : "11"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

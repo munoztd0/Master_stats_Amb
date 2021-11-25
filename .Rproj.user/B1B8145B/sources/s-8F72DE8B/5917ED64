@@ -1,0 +1,28 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1637862622988.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "5917ED64",
+    "lastKnownWriteTime" : 1637868054,
+    "last_content_update" : 1637868054508,
+    "path" : "~/Desktop/Drive/Ambroise/Ambroise.Rmd",
+    "project_path" : "Ambroise.Rmd",
+    "properties" : {
+        "cursorPosition" : "227,0",
+        "docOutlineVisible" : "1",
+        "last_setup_crc32" : "8F72DE8Bbde913b7",
+        "scrollLine" : "215",
+        "tempName" : "Untitled2"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

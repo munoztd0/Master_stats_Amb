@@ -1,0 +1,6 @@
+"0","base_recco = filter(base_clean, id %notin% c(""13594"")) #remove huge outliers, see appendix"
+"0",""
+"0","final_recco = lm(Reccomend ~Priming*Product + Behav_enviro + Product:Behav_enviro,  data = base_recco)"
+"0",""
+"0","apa_lm <- apa_print(anova(final_recco))"
+"0","apa_table(apa_lm$table,  caption = ""Anova table for Reccomendation."")"

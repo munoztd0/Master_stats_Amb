@@ -1,0 +1,34 @@
+descritptives : ages , profession, sexe
+
+sumaary stats + graoh distrib var environememntal 
+
+
+critere: 
+
+graph ditrib -> temps valeur extermene
+
+straight lining -> checker variance au sein individu
+
+checker correspondance
+
+groupe between (amorce comput VS affect)
+
+between evaluation (A vs A++) -> evaluation de durabilité 
+
+VD -> prix (primaire)
+VD -> prpba acheter produit
+VD -> suscbetibilité recomandation
+VD -> a quel point ecologioque
+
+moderateur:
+mesure comportement pro environemmetale (score) 
+demographique: age sexe profession
+mode decisionel
+
+hollistic affect
+
+
+
+
+
+
