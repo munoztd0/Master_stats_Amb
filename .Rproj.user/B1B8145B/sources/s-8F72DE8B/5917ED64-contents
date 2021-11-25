@@ -1,6 +1,6 @@
 ---
 title: "ANALYSIS REPORT"
-author: "David Munoz Tord"
+author: "Ambroise"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   html_document:  
