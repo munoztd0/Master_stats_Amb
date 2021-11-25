@@ -1,3 +1,0 @@
-"0","#check normality"
-"0",""
-"0","plotNormalHistogram(base_clean$Price, main = ""Price"")"

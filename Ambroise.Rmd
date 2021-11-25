@@ -15,7 +15,7 @@ repro:
   data:
     data_ambroise_full: Enquete_Ambroise.sav
     
-  packages: [ aaronpeikert/repro@devel, crsh/papaja@devel, tinylabels, apaTables, haven, ggplot2,  tidyverse, gtsummary, car, GGally, MASS, matrixStats, rcompanion, moments, utils, sjPlot, interactions]
+  packages: [ aaronpeikert/repro@devel, crsh/papaja@devel, tinylabels, apaTables, haven, ggplot2,  tidyverse, gtsummary, car, GGally, MASS, matrixStats, rcompanion, moments, utils, sjPlot, interactions, kableExtra]
   scripts: clean.R
 ---
 
@@ -55,8 +55,7 @@ This file was automatically created via `the Repro package (version 0.1.0)` usin
 
 
 ```{r options, results='hide', message=FALSE, warning=FALSE}
-options(scipen = 666, warn=-1, contrasts=c("contr.sum","contr.poly"))  #remove scientific notation # remove warnings #set contrasts to sum ! #remove scientific notation # remove warnings #set contrasts to sum !
- #cl = parallel::detectCores()/2
+options(scipen = 666, warn=-1, contrasts=c("contr.sum","contr.poly"), knitr.kable.NA = '')  #remove scientific notation # remove warnings #set contrasts to sum ! 
 set.seed(666) #set random seed
 
 # panderOptions('knitr.auto.asis', FALSE) #remove auto styling
@@ -92,7 +91,7 @@ base[c("Age", "Gender", "Profession")] %>%  tbl_summary(statistic = list(all_con
 #### Price
 ```{r GLM Price}
 
-base_price = filter(base_clean, id %notin% c("11188", "12775")) #remove huge outliers, see appendix
+base_price = filter(base_clean, id %notin% c("11188", "12775", "13105", "12721")) #remove huge outliers, see appendix
 
 final_price = lm(Price~ Priming + Product + Age + Behav_enviro + Priming:Product,  data = base_price)
 
@@ -134,95 +133,175 @@ interactions::interact_plot(final_recco, pred = Behav_enviro, modx = Product, in
 
 
 ```
+\
 Example for reporting :\
 
 Product (`r apa_lm$full_result$Product`) and Behav_enviro (`r apa_lm$full_result$Behav_enviro`) affected reccomendation. However, the effect of Behav_enviro differed by Product, `r apa_lm$full_result$Product_Behav_enviro`.
 
+$~$
+$~$
 
-```{r diag GLM, fig.show='hide', echo=FALSE, message=FALSE, warning=FALSE}
+#### Ecologic Evaluation
 
+TO DO
 
-# Eval eco -------------------------------------------------------------------
-
-
+```{r GLM Ecolo_Eval}
 ```
+
+$~$
+$~$
 
 ### Appendix
-#### Check normality
-```{r annexes}
-#check normality
 
-plotNormalHistogram(base_clean$Price, main = "Price")
-plotNormalHistogram(base_clean$Reccomend, main = "Reccomendation")
-plotNormalHistogram(base_clean$Buy, main = "Probability to buy")
+$~$
+$~$
 
-densityPlot(base_clean$Price, g = base_clean$Product) # by product
+#### Visual check normality
 
-#The rule of thumb seems to be: If the skewness is between -0.5 and 0.5, the data are fairly symmetrical.
-skewness(base_clean$Price, na.rm = TRUE)
-skewness(base_clean$Reccomend, na.rm = TRUE)
-skewness(base_clean$Buy, na.rm = TRUE)
+```{r annexes, fig.show="hold", out.width="50%"}
+
+plotNormalHistogram(base_clean$Price, main = "Price", sub = paste("skewness =", skewness(base_clean$Price, na.rm = TRUE))) 
 
 
-plotNormalHistogram(sqrt(base_clean$Price), main = "Price")
+
+# print("Check price density by product")
+# densityPlot(base_clean$Price, g = base_clean$Product) # by product
+
+plotNormalHistogram(base_clean$Reccomend, main = "Reccomendation", sub = paste("skewness =", skewness(base_clean$Reccomend, na.rm = TRUE)))
+
+
+
+plotNormalHistogram(base_clean$Buy, main = "Probability to buy", sub = 
+paste("skewness =", skewness(base_clean$Buy, na.rm = TRUE)))
+
+
+plotNormalHistogram(base_clean$Ecolo_Eval, main = "Ecologic Evaluation", sub =
+paste("skewness =", skewness(base_clean$Ecolo_Eval, na.rm = TRUE)))
 
 ```
 
-#### Diagnostics Plots for GLM Price
+$~$
+$~$
 
-```{r diag GLM Price, echo=FALSE, message=FALSE, warning=FALSE}
+#### Diagnostics Plots for GLM Price with outliers
+
+```{r diag GLM Price, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="50%"}
 
 modprice = lm(Price ~ Priming*Product*Age*Behav_enviro*Decision_mode, data = base_clean)
 
 plot(modprice, c(1:2,4), labels.id = base_clean$id )
+```
 
+$~$
+$~$
 
+#### Diagnostics Plots for GLM Price without outliers
+
+```{r diag GLM Price2, echo=FALSE, message=FALSE, warning=FALSE,  fig.show="hold", out.width="50%"}
 modprice = lm(Price ~ Priming*Product*Age*Behav_enviro, data = base_price)
 
 plot(modprice, c(1:2,4), labels.id = base_price$id )
-
-
-MS = MASS::stepAIC(modprice, direction = "both", trace = FALSE)
-MS$anova
 ```
 
-#### Diagnostics Plots for GLM Probability to buy
-```{r diag GLM Buy, echo=FALSE, message=FALSE, warning=FALSE}
+$~$
+$~$
+
+#### Model selection for price
+```{r diag GLM MSprice, echo=FALSE, message=FALSE, warning=FALSE}
+
+MS = MASS::stepAIC(modprice, direction = "both", trace = FALSE)
+
+x = kable(attributes(MS$anova)$heading, format="html") %>%
+    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(1, bold=T,align='c') %>%  row_spec(4, bold=T)
+gsub("<thead>.*</thead>", "", x)
+
+
+kable(MS$anova, format="html") %>%
+    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(0, bold=T,align='c')
+
+
+```
+
+$~$
+$~$
+
+#### Diagnostics Plots for GLM Probability to buy with outliers
+```{r diag GLM Buy, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="50%"}
 
 modbuy = lm(Buy ~ Priming*Product*Decision_mode +Age+ Priming*Product*Behav_enviro, data = base_clean)
 
 plot(modbuy, c(1:2,4), labels.id = base_clean$id )
+```
 
+$~$
+$~$
 
+#### Diagnostics Plots for GLM Probability to buy without outliers
+```{r diag GLM Buy2`, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="50%"}
 modbuy = lm(Buy ~ Priming*Product*Age*Behav_enviro, data = base_buy)
 
 plot(modbuy, c(1:2,4), labels.id = base_buy$id )
-
-
-MS = MASS::stepAIC(modbuy, direction = "both", trace = FALSE)
-MS$anova
-
-
-sjPlot::plot_model(final_buy, type = "pred")
 ```
 
-#### Diagnostics Plots for GLM Reccomendation
-```{r diag GLM Recco, echo=FALSE, message=FALSE, warning=FALSE}
+$~$
+$~$
+
+#### Model selection for Probality to buy
+```{r diag GLM MSbuy, echo=FALSE, message=FALSE, warning=FALSE}
+
+MS = MASS::stepAIC(modbuy, direction = "both", trace = FALSE)
+
+x = kable(attributes(MS$anova)$heading, format="html") %>%
+    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(1, bold=T,align='c') %>%  row_spec(4, bold=T)
+gsub("<thead>.*</thead>", "", x)
+
+
+kable(MS$anova, format="html") %>%
+    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(0, bold=T,align='c')
+
+# sjPlot::plot_model(final_buy, type = "pred")
+```
+
+
+$~$
+$~$
+
+#### Diagnostics Plots for GLM Reccomendation with outliers
+```{r diag GLM Recco, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="50%"}
 
 modrecco = lm(Reccomend ~ Priming*Product*Decision_mode +Age+ Priming*Product*Behav_enviro, data = base_clean)
 
 plot(modrecco, c(1:2,4), labels.id = base_clean$id )
+```
 
+$~$
+$~$
 
+#### Diagnostics Plots for GLM Reccomendation with outliers
+```{r diag GLM Recco2, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="50%"}
 
 modrecco = lm(Reccomend ~Priming*Product*Decision_mode +Age+ Priming*Product*Behav_enviro, data = base_recco)
 
 plot(modrecco, c(1:2,4), labels.id = base_recco$id )
+```
 
+$~$
+$~$
+
+#### Model selection for Reccomendation
+```{r diag GLM MSrecco, echo=FALSE, message=FALSE, warning=FALSE}
 
 MS = MASS::stepAIC(modrecco, direction = "both", trace = FALSE)
-MS$anova
 
-sjPlot::plot_model(final_recco, type = "pred")
+x = kable(attributes(MS$anova)$heading, format="html") %>%
+    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(1, bold=T,align='c') %>%  row_spec(4, bold=T)
+gsub("<thead>.*</thead>", "", x)
+
+
+kable(MS$anova, format="html") %>%
+    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(0, bold=T,align='c')
+
+# sjPlot::plot_model(final_recco, type = "pred")
 ```
+
 

@@ -1,4 +1,0 @@
-"0",""
-"0","modprice = lm(Price ~ Priming*Product*Age*Behav_enviro*Decision_mode, data = base_clean)"
-"0",""
-"0","plot(modprice, c(1:3,4), labels.id = base_clean$id )"

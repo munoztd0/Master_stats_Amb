@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1637868878064.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "764C4FC6",
+    "lastKnownWriteTime" : 1635779869,
+    "last_content_update" : 1635779869,
+    "path" : "~/Desktop/SwitchDrive/LIRA/OBIWAN_LIRA.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "494,121",
+        "scrollLine" : "489"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
