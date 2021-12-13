@@ -32,20 +32,10 @@ automate_load_scripts()
 # load data
 data_ambroise_full  <- automate_load_data(data_ambroise_full, read_sav)
 
-## we recommend running this is a fresh R session or restarting your current session
-#install.packages("cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
-#install_cmdstan()
-
-
-# check_git(); check_make(); check_docker() #check if installed
 
 
 sessio = sessionInfo(); #opts_chunk$set(echo = F, message=F, warning=F) # set echo F for all
 
-
-#May I suggest running `repro::automate()`? 
-
-#This will create a `Dockerfile` & `Makefile` based on every RMarkdown in this folder and the special yamls in them. date: "`r format(Sys.time(), '%d %B, %Y')`" 
   
 ```
 
@@ -84,50 +74,90 @@ Blabla
 base[c("Age", "Gender", "Profession")] %>%  tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})", all_categorical() ~ "{n} / {N} ({p}%)"),)  %>% modify_caption("**Table 1. Demographics **") %>%
   bold_labels()
 ```
+$~$
+$~$
 
 ### Statistics
 
+$~$
+$~$
+
+#####  Correlation 
+```{r clean up, echo=FALSE, message=FALSE, warning=FALSE}
+base_clean$Gender = recode_factor(base_clean$Gender, "Autre/NA" = NA_character_)
+
+ggpubr::ggscatter(base_clean, x = "negatif_cilmat", y = "positive_climate", position = position_jitter(w = 0.1, h = 0.1),
+                  color = "black", shape = 21, size = 3, # Points color, shape and size
+                  add = "reg.line",  # Add regressin line
+                  add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+                  conf.int = TRUE, # Add confidence interval
+                  cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+                  cor.coeff.args = list(method = "pearson", label.x = 6, label.sep = "\n")
+)
+```
+
+$~$
+$~$
 
 #### Price
-```{r GLM Price}
+```{r lm Price}
+base_price = base_clean #no huge outliers, see appendix
 
-base_price = filter(base_clean, id %notin% c("11188", "12775", "13105", "12721")) #remove huge outliers, see appendix
-
-final_price = lm(Price~ Priming + Product + Age + Behav_enviro + Priming:Product,  data = base_price)
+final_price = lm(Price ~ Priming*Product+ Behav_enviro + Age,  data = base_price)
 
 apa_lm <- apa_print(anova(final_price))
 apa_table(apa_lm$table,  caption = "Anova table for Price.")
+```
+```{r, results="hide"}
 
 plot_model(final_price)
 
+sjPlot::plot_model(final_price, type = "pred")[3]
+
 ```
 
+$~$
+$~$
+
 #### Probability to buy
-```{r GLM Buy}
-base_buy = filter(base_clean, id %notin% c("11269","13804", "12766")) #remove huge outliers, see appendix
+```{r lm Buy}
+base_buy = filter(base_clean, id %notin% c("13804")) #remove huge outliers, see appendix
 
 
-final_buy = lm(Buy ~ Priming*Product + Age + Behav_enviro + Product:Age +  Product:Behav_enviro + Age:Behav_enviro + Product:Age:Behav_enviro,  data = base_buy)
+final_buy = lm(Buy ~ Priming*Product + Behav_enviro + Age,  data = base_buy)
 
 apa_lm <- apa_print(anova(final_buy))
 apa_table(apa_lm$table,  caption = "Anova table for Probability to buy.")
 
+````
+```{r, results="hide"}
 sjPlot::plot_model(final_buy)
 
 
+sjPlot::plot_model(final_buy, type = "pred")[2]
+sjPlot::plot_model(final_buy, type = "pred")[3]
+sjPlot::plot_model(final_buy, type = "pred")[4]
+
 ```
 
-#### Reccomendation
-```{r GLM Recco}
-base_recco = filter(base_clean, id %notin% c("13594")) #remove huge outliers, see appendix
+$~$
+$~$
 
-final_recco = lm(Reccomend ~Priming*Product + Behav_enviro + Product:Behav_enviro,  data = base_recco)
+#### Reccomendation
+```{r lm Recco}
+base_recco = base_clean #no huge outliers, see appendix
+
+final_recco = lm(Reccomend ~ Priming*Product+Product*Behav_enviro + Age + Gender,  data = base_recco)
 
 apa_lm <- apa_print(anova(final_recco))
 apa_table(apa_lm$table,  caption = "Anova table for Reccomendation.")
+```
 
-
+```{r, results="hide"}
 sjPlot::plot_model(final_recco)
+
+sjPlot::plot_model(final_recco, type = "pred")[2]
+sjPlot::plot_model(final_recco, type = "pred")[3]
 
 interactions::interact_plot(final_recco, pred = Behav_enviro, modx = Product, interval = TRUE)
 
@@ -140,168 +170,192 @@ Product (`r apa_lm$full_result$Product`) and Behav_enviro (`r apa_lm$full_result
 
 $~$
 $~$
-
+  
 #### Ecologic Evaluation
+  
+  
+```{r lm Ecolo_Eval}
 
-TO DO
+base_eco = filter(base_clean, id %notin% c("13594", "11200", "13804", "12529", "11017")) #remove huge outliers, see appendix
 
-```{r GLM Ecolo_Eval}
+final_eco = lm(Ecolo_Eval ~ Priming*Product+Behav_enviro + Age + Gender,  data = base_eco)
+
+apa_lm <- apa_print(anova(final_eco))
+apa_table(apa_lm$table, caption = "Anova table for Reccomendation.")
+```
+
+```{r, results="hide"}
+sjPlot::plot_model(final_eco)
+
+sjPlot::plot_model(final_eco, type = "pred")[2]
+sjPlot::plot_model(final_eco, type = "pred")[3]
+
 ```
 
 $~$
 $~$
-
+  
 ### Appendix
-
+  
 $~$
 $~$
-
+  
 #### Visual check normality
-
+  
 ```{r annexes, fig.show="hold", out.width="50%"}
 
 plotNormalHistogram(base_clean$Price, main = "Price", sub = paste("skewness =", skewness(base_clean$Price, na.rm = TRUE))) 
 
 
-
 # print("Check price density by product")
 # densityPlot(base_clean$Price, g = base_clean$Product) # by product
 
-plotNormalHistogram(base_clean$Reccomend, main = "Reccomendation", sub = paste("skewness =", skewness(base_clean$Reccomend, na.rm = TRUE)))
+plotNormalHistogram(base_clean$Reccomend, main = "Reccomendation", sub = paste("skewness =", round(skewness(base_clean$Reccomend, na.rm = TRUE)),2))
 
 
 
 plotNormalHistogram(base_clean$Buy, main = "Probability to buy", sub = 
-paste("skewness =", skewness(base_clean$Buy, na.rm = TRUE)))
+                      paste("skewness =", round(skewness(base_clean$Buy, na.rm = TRUE),2)))
 
 
 plotNormalHistogram(base_clean$Ecolo_Eval, main = "Ecologic Evaluation", sub =
-paste("skewness =", skewness(base_clean$Ecolo_Eval, na.rm = TRUE)))
+                      paste("skewness =", round(skewness(base_clean$Ecolo_Eval, na.rm = TRUE),2)))
 
 ```
 
 $~$
 $~$
-
-#### Diagnostics Plots for GLM Price with outliers
-
-```{r diag GLM Price, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="50%"}
-
-modprice = lm(Price ~ Priming*Product*Age*Behav_enviro*Decision_mode, data = base_clean)
-
-plot(modprice, c(1:2,4), labels.id = base_clean$id )
-```
-
-$~$
-$~$
-
-#### Diagnostics Plots for GLM Price without outliers
-
-```{r diag GLM Price2, echo=FALSE, message=FALSE, warning=FALSE,  fig.show="hold", out.width="50%"}
-modprice = lm(Price ~ Priming*Product*Age*Behav_enviro, data = base_price)
-
-plot(modprice, c(1:2,4), labels.id = base_price$id )
-```
-
-$~$
-$~$
-
+  
+  
 #### Model selection for price
-```{r diag GLM MSprice, echo=FALSE, message=FALSE, warning=FALSE}
+```{r diag lm MSprice, echo=FALSE, message=FALSE, warning=FALSE}
+modprice = lm(Price ~ Priming*Product*Behav_enviro + Priming*Product*Decision_mode + Priming*Product*Age, data = base_clean)
 
 MS = MASS::stepAIC(modprice, direction = "both", trace = FALSE)
 
 x = kable(attributes(MS$anova)$heading, format="html") %>%
-    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(1, bold=T,align='c') %>%  row_spec(4, bold=T)
+    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(1, bold=T,align='c') 
 gsub("<thead>.*</thead>", "", x)
 
 
 kable(MS$anova, format="html") %>%
     kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(0, bold=T,align='c')
 
-
 ```
 
 $~$
 $~$
+  
+#### Price: Diagnostics Plots for linear model 
+  
+```{r diag lm Price2, echo=FALSE, results='hide',  fig.show="hold", out.width="50%"}
+modprice = lm(Price ~ Priming + Product + Behav_enviro + Age + Priming:Product, data = base_price)
 
-#### Diagnostics Plots for GLM Probability to buy with outliers
-```{r diag GLM Buy, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="50%"}
-
-modbuy = lm(Buy ~ Priming*Product*Decision_mode +Age+ Priming*Product*Behav_enviro, data = base_clean)
-
-plot(modbuy, c(1:2,4), labels.id = base_clean$id )
-```
-
-$~$
-$~$
-
-#### Diagnostics Plots for GLM Probability to buy without outliers
-```{r diag GLM Buy2`, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="50%"}
-modbuy = lm(Buy ~ Priming*Product*Age*Behav_enviro, data = base_buy)
-
-plot(modbuy, c(1:2,4), labels.id = base_buy$id )
+plot(modprice, c(1:2,4), labels.id = base_price$id)
+sjPlot::plot_model(modprice, type="diag")[[3]]
 ```
 
 $~$
 $~$
 
 #### Model selection for Probality to buy
-```{r diag GLM MSbuy, echo=FALSE, message=FALSE, warning=FALSE}
+```{r diag lm MSbuy, echo=FALSE, message=FALSE, warning=FALSE}
+
+modbuy = lm(Buy ~ Priming*Product*Behav_enviro + Priming*Product*Decision_mode + Priming*Product*Age, data = base_clean)
 
 MS = MASS::stepAIC(modbuy, direction = "both", trace = FALSE)
 
 x = kable(attributes(MS$anova)$heading, format="html") %>%
-    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(1, bold=T,align='c') %>%  row_spec(4, bold=T)
+    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(1, bold=T,align='c') 
 gsub("<thead>.*</thead>", "", x)
 
 
 kable(MS$anova, format="html") %>%
     kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(0, bold=T,align='c')
 
-# sjPlot::plot_model(final_buy, type = "pred")
-```
-
-
-$~$
-$~$
-
-#### Diagnostics Plots for GLM Reccomendation with outliers
-```{r diag GLM Recco, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="50%"}
-
-modrecco = lm(Reccomend ~ Priming*Product*Decision_mode +Age+ Priming*Product*Behav_enviro, data = base_clean)
-
-plot(modrecco, c(1:2,4), labels.id = base_clean$id )
 ```
 
 $~$
 $~$
+  
+  
+#### Probability to buy: Diagnostics Plots for linear model  
+```{r diag lm Buy2, echo=FALSE, results="hide", fig.show="hold", out.width="50%"}
+modbuy = lm(Buy ~ Product*Priming + Behav_enviro + Age + Product:Behav_enviro, data = base_buy)
 
-#### Diagnostics Plots for GLM Reccomendation with outliers
-```{r diag GLM Recco2, echo=FALSE, message=FALSE, warning=FALSE, fig.show="hold", out.width="50%"}
-
-modrecco = lm(Reccomend ~Priming*Product*Decision_mode +Age+ Priming*Product*Behav_enviro, data = base_recco)
-
-plot(modrecco, c(1:2,4), labels.id = base_recco$id )
+plot(modbuy, c(1:2,4), labels.id = base_buy$id)
+sjPlot::plot_model(modbuy, type="diag")[[3]]
 ```
 
 $~$
 $~$
-
+  
 #### Model selection for Reccomendation
-```{r diag GLM MSrecco, echo=FALSE, message=FALSE, warning=FALSE}
+```{r diag lm MSrecco, echo=FALSE, message=FALSE, warning=FALSE}
+
+modrecco = lm(Reccomend ~ Priming*Product*Behav_enviro + Priming*Product*Decision_mode + Priming*Product*Age, data = base_clean)
 
 MS = MASS::stepAIC(modrecco, direction = "both", trace = FALSE)
 
 x = kable(attributes(MS$anova)$heading, format="html") %>%
-    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(1, bold=T,align='c') %>%  row_spec(4, bold=T)
+    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(1, bold=T,align='c') 
 gsub("<thead>.*</thead>", "", x)
 
 
 kable(MS$anova, format="html") %>%
     kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(0, bold=T,align='c')
 
-# sjPlot::plot_model(final_recco, type = "pred")
 ```
 
+
+$~$
+$~$
+  
+#### Reccomendation: Diagnostics Plots for linear model AFTER
+```{r diag lm Recco2, echo=FALSE, results="hide", fig.show="hold", out.width="50%"}
+modrecco = lm(Reccomend ~ Priming*Product + Behav_enviro + Product:Behav_enviro, data = base_recco)
+
+plot(modrecco, c(1:2,4), labels.id = base_recco$id)
+sjPlot::plot_model(modrecco, type="diag")[[3]]
+```
+
+$~$
+$~$
+  
+
+#### Model selection for Ecologic Evaluation
+```{r diag lm MSeco, echo=FALSE, message=FALSE, warning=FALSE}
+modeco = lm(Ecolo_Eval ~ Priming*Product*Behav_enviro + Priming*Product*Decision_mode + Priming*Product*Age, data = base_clean)
+
+MS = MASS::stepAIC(modeco, direction = "both", trace = FALSE)
+
+x = kable(attributes(MS$anova)$heading, format="html") %>%
+    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(1, bold=T,align='c') 
+gsub("<thead>.*</thead>", "", x)
+
+
+kable(MS$anova, format="html") %>%
+    kable_styling(latex_options = "HOLD_position", position = "center", full_width = F) %>%  row_spec(0, bold=T,align='c')
+
+```
+
+$~$
+$~$
+  
+#### Ecologic Evaluation: Diagnostics Plots for linear model AFTER
+```{r diag lm EcoEval, echo=FALSE, results="hide", fig.show="hold", out.width="50%"}
+modeco = lm(Ecolo_Eval ~ Priming*Product*Decision_mode + Behav_enviro + Priming*Product*Age, data = base_eco)
+
+plot(modeco, c(1:2,4), labels.id = base_eco$id)
+sjPlot::plot_model(modeco, type="diag")[[3]]
+```
+
+$~$
+$~$
+  
+
+
+```{r}
+report::report_packages()
+```
 

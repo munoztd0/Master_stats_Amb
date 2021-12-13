@@ -1,7 +1,0 @@
-"0",""
-"0","base_price = filter(base_clean, id %notin% c(""11188"", ""12775"")) #remove huge outliers, see appendix"
-"0",""
-"0","final_price = lm(Price~ Priming + Product + Age + Behav_enviro + Priming:Product,  data = base_price)"
-"0",""
-"0","apa_lm <- apa_print(anova(final_price))"
-"0","apa_table(apa_lm$table,  caption = ""Anova table for Price."")"
