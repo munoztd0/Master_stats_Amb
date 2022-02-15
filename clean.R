@@ -15,16 +15,20 @@ mean(data_ambroise$checkA) + mean(data_ambroise$checkB) + mean(data_ambroise$che
 
 base  <- subset(data_ambroise, select= c("Priming",  "Reccomend", "Product", "Prix", "ProbabilitéACHAT", "EcologiqueEVAL", "Duration__in_seconds_", "id", "Q10.1", "Q12.1",  "Q12.2", "ComportementEnvironmental", "Q14.2", "Q14.3", "Q14.4", "Q14.5"))
 
-colnames(base) <- c("Priming",  "Reccomend", "Product", "Price", "Buy", "Ecolo_Eval", "Time", "id", "Decision_mode", "negatif_cilmat",  "positive_climate", "Behav_enviro", "Age", "Gender", "Profession", "commentaires")
+colnames(base) <- c("Priming",  "Reccomend", "Product", "Price", "Buy", "Ecolo_Eval", "Time", "id", "Decision_mode", "negatif_affect",  "positive_affect", "Behav_enviro", "Age", "Gender", "Profession", "commentaires")
 
 
 str(base)
 
 #transformé age en continue et recategorisé Gender et profession
 base$Age = as.numeric(as.character(base$Age))
+base$positive_affect = as.numeric(as.character(base$positive_affect))
+base$negatif_affect = as.numeric(as.character(base$negatif_affect))
 base$Gender = as.factor(base$Gender); levels(base$Gender) <- c("Homme", "Femme", "Autre/NA", "Autre/NA")
 
 base$Profession = as.factor(base$Profession); levels(base$Profession) <- c("Etudiant.e", "Actif.ve", "Les deux", "Les deux")
+
+base$`Decision Mode` = as.factor(base$Decision_mode); levels(base$`Decision Mode`) <- c("Affectif", "Les deux", "Cognitif")
 
 
 
@@ -69,10 +73,10 @@ plot(base_clean$Behav_enviro, base_clean$Age)
 with(base_clean, Boxplot(Age, id=list(labels=base_clean$id)))
 
 #straight lining ? par rapport a quel items?
-base_clean$straight_lining = rowMeans(base_clean[c("Reccomend" ,     "Buy", "Ecolo_Eval",   "negatif_cilmat",   "positive_climate",   "Behav_enviro")])
+base_clean$straight_lining = rowMeans(base_clean[c("Reccomend" ,     "Buy", "Ecolo_Eval",   "negatif_affect",   "positive_affect",   "Behav_enviro")])
 
 
-x = transform(as.matrix(base_clean[c("Reccomend" ,     "Buy", "Ecolo_Eval",   "negatif_cilmat",   "positive_climate",   "Behav_enviro")]), SD=rowSds(as.matrix(base_clean[c("Reccomend" ,     "Buy", "Ecolo_Eval",   "negatif_cilmat",   "positive_climate",   "Behav_enviro")]), na.rm=TRUE)) # to check SD
+x = transform(as.matrix(base_clean[c("Reccomend" ,     "Buy", "Ecolo_Eval",   "negatif_affect",   "positive_affect",   "Behav_enviro")]), SD=rowSds(as.matrix(base_clean[c("Reccomend" ,     "Buy", "Ecolo_Eval",   "negatif_affect",   "positive_affect",   "Behav_enviro")]), na.rm=TRUE)) # to check SD
 
 
 #enlever sujet bad

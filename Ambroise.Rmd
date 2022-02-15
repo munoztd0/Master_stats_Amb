@@ -73,6 +73,9 @@ Blabla
 ```{r demographics}
 base[c("Age", "Gender", "Profession")] %>%  tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})", all_categorical() ~ "{n} / {N} ({p}%)"),)  %>% modify_caption("**Table 1. Demographics **") %>%
   bold_labels()
+
+base_clean[c("Decision Mode")] %>%  tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})", all_categorical() ~ "{n} / {N} ({p}%)"),)   %>% modify_caption("**Table 2. Decision Mode **") %>%
+  bold_labels()
 ```
 $~$
 $~$
@@ -82,62 +85,96 @@ $~$
 $~$
 $~$
 
-#####  Correlation 
-```{r clean up, echo=FALSE, message=FALSE, warning=FALSE}
-base_clean$Gender = recode_factor(base_clean$Gender, "Autre/NA" = NA_character_)
 
-ggpubr::ggscatter(base_clean, x = "negatif_cilmat", y = "positive_climate", position = position_jitter(w = 0.1, h = 0.1),
-                  color = "black", shape = 21, size = 3, # Points color, shape and size
-                  add = "reg.line",  # Add regressin line
-                  add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
-                  conf.int = TRUE, # Add confidence interval
-                  cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
-                  cor.coeff.args = list(method = "pearson", label.x = 6, label.sep = "\n")
-)
-```
-
-$~$
-$~$
 
 #### Price
 ```{r lm Price}
 base_price = base_clean #no huge outliers, see appendix
 
-final_price = lm(Price ~ Priming*Product+ Behav_enviro + Age,  data = base_price)
+final_price = lm(Price ~ Priming*Product + Age + Decision_mode + Priming*Product + Product*negatif_affect + Product*positive_affect,  data = base_price)
 
 apa_lm <- apa_print(anova(final_price))
 apa_table(apa_lm$table,  caption = "Anova table for Price.")
 ```
+
 ```{r, results="hide"}
 
 plot_model(final_price)
 
-sjPlot::plot_model(final_price, type = "pred")[3]
+interactions::cat_plot(final_price, pred = Priming, modx = Product, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), modx.labels = c("A+","A++"), errorbar.width = 0.4, y.label = "Price Evaluation")   
+
+interactions::interact_plot(final_price, pred = positive_affect, modx = Product, interval = TRUE, plot.points = T, point.alpha =0.3, modx.labels = c("A+","A++"), x.label = "Positive affect towards climate change", y.label = "Price Evaluation")    
+
+
+interactions::interact_plot(final_price, pred = positive_affect, modx = Product, interval = TRUE, plot.points = F, point.alpha =0.3, modx.labels = c("A+","A++"), x.label = "Positive affect towards climate change", y.label = "Price Evaluation")    
 
 ```
+$~$
+
+  
+Grand biais vers 0 avec les positive affect scale. Resultat pas très interpretable donc... Mais je laisse les deux graphs au cas ou.
 
 $~$
 $~$
+
+
+
+#### Price A++
+```{r lm PriceA+}
+base_priceA = filter(base_price, Product == 1)
+
+final_priceA = lm(Price ~ Priming*Decision_mode + Age,  data = base_priceA)
+
+apa_lm <- apa_print(anova(final_priceA))
+apa_table(apa_lm$table,  caption = "Anova table for Price with only A++ product.")
+```
+
+```{r, results="hide"}
+plot_model(final_priceA)
+
+interactions::cat_plot(final_priceA, pred = Priming, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), errorbar.width = 0.4, y.label = "Price Evaluation")    
+```
+
+
 
 #### Probability to buy
 ```{r lm Buy}
 base_buy = filter(base_clean, id %notin% c("13804")) #remove huge outliers, see appendix
 
 
-final_buy = lm(Buy ~ Priming*Product + Behav_enviro + Age,  data = base_buy)
+final_buy = lm(Buy ~ Priming*Product + Age + Decision_mode + Priming*Product + Product*negatif_affect + Product*positive_affect,  data = base_buy, y.label = "Probability to buy")   
 
 apa_lm <- apa_print(anova(final_buy))
 apa_table(apa_lm$table,  caption = "Anova table for Probability to buy.")
+```
 
-````
 ```{r, results="hide"}
 sjPlot::plot_model(final_buy)
 
 
-sjPlot::plot_model(final_buy, type = "pred")[2]
-sjPlot::plot_model(final_buy, type = "pred")[3]
-sjPlot::plot_model(final_buy, type = "pred")[4]
+interactions::cat_plot(final_buy, pred = Product, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("A+","A++"), errorbar.width = 0.4, y.label = "Probability to buy")   
 
+sjPlot::plot_model(final_buy, type = "pred", show.data = T)[3]
+
+interactions::cat_plot(final_buy, pred = Priming, modx = Product, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), modx.labels = c("A+","A++"), errorbar.width = 0.4, y.label = "Probability to buy")   
+```
+
+
+
+#### Probability to buy A++
+```{r lm BuyA}
+base_buyA = filter(base_buy, Product == 1)
+
+final_buyA = lm(Buy ~ Priming*Decision_mode + Age ,  data = base_buyA)
+
+apa_lm <- apa_print(anova(final_buyA))
+apa_table(apa_lm$table,  caption = "Anova table for Probability to buy only A++ product.")
+```
+
+```{r, results="hide"}
+plot_model(final_buyA)
+
+interactions::cat_plot(final_buyA, pred = Priming, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), errorbar.width = 0.4, y.label = "Probability to buy")   
 ```
 
 $~$
@@ -147,26 +184,53 @@ $~$
 ```{r lm Recco}
 base_recco = base_clean #no huge outliers, see appendix
 
-final_recco = lm(Reccomend ~ Priming*Product+Product*Behav_enviro + Age + Gender,  data = base_recco)
+final_recco = lm(Reccomend ~ Priming*Product  + Age + Decision_mode + Priming*Product + Product*negatif_affect + Product*positive_affect,  data = base_recco)
 
 apa_lm <- apa_print(anova(final_recco))
 apa_table(apa_lm$table,  caption = "Anova table for Reccomendation.")
 ```
 
 ```{r, results="hide"}
-sjPlot::plot_model(final_recco)
 
-sjPlot::plot_model(final_recco, type = "pred")[2]
-sjPlot::plot_model(final_recco, type = "pred")[3]
+plot_model(final_recco)
 
-interactions::interact_plot(final_recco, pred = Behav_enviro, modx = Product, interval = TRUE)
+interactions::cat_plot(final_recco, pred = Product, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("A+","A++"), errorbar.width = 0.4, y.label = "Reccomendation to buy")  
 
+sjPlot::plot_model(final_recco, type = "pred", show.data = T)[5]
 
+interactions::cat_plot(final_recco, pred = Priming, modx = Product, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), modx.labels = c("A+","A++"), errorbar.width = 0.4, y.label = "Reccomendation to buy")  
+
+interactions::interact_plot(final_recco, pred = negatif_affect, modx = Product, interval = TRUE, plot.points = T, point.alpha =0.3, modx.labels = c("A+","A++"), x.label = "Negative affect towards climate change", y.label = "Reccomendation to buy")  
+
+interactions::interact_plot(final_recco, pred = negatif_affect, modx = Product, interval = TRUE, plot.points = F, point.alpha =0.3, modx.labels = c("A+","A++"), x.label = "Negative affect towards climate change", y.label = "Reccomendation to buy") 
 ```
-\
+$~$
+$~$
+
+negatif_affect barely significatif and doesn't look very informative by itself mais l'interaction mest plus interessante (avec et sans les points pour que ce soit plus digeste)
+  
+$~$
+$~$
 Example for reporting :\
 
-Product (`r apa_lm$full_result$Product`) and Behav_enviro (`r apa_lm$full_result$Behav_enviro`) affected reccomendation. However, the effect of Behav_enviro differed by Product, `r apa_lm$full_result$Product_Behav_enviro`.
+Product (`r apa_lm$full_result$Product`) and Negative affect towards climate change (`r apa_lm$full_result$negatif_affect`) affected reccomendation. However, the effect of Behav_enviro differed by Product, `r apa_lm$full_result$Product_negatif_affect`.
+
+
+#### Reccomendation A++
+```{r lm ReccoA}
+base_reccoA = filter(base_recco, Product == 1)
+
+final_reccoA = lm(Reccomend ~ Priming*Decision_mode + Age,  data = base_reccoA)
+
+apa_lm <- apa_print(anova(final_reccoA))
+apa_table(apa_lm$table,  caption = "Anova table for Reccomendation to buy only A++ product.")
+```
+
+```{r, results="hide"}
+plot_model(final_reccoA)
+
+interactions::cat_plot(final_reccoA, pred = Priming, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), errorbar.width = 0.4, y.label = "Reccomendation to buy") 
+```
 
 $~$
 $~$
@@ -178,24 +242,64 @@ $~$
 
 base_eco = filter(base_clean, id %notin% c("13594", "11200", "13804", "12529", "11017")) #remove huge outliers, see appendix
 
-final_eco = lm(Ecolo_Eval ~ Priming*Product+Behav_enviro + Age + Gender,  data = base_eco)
+final_eco = lm(Ecolo_Eval ~ Priming*Product  + Age + Decision_mode + Priming*Product + Product*negatif_affect + Product*positive_affect,  data = base_eco)
 
 apa_lm <- apa_print(anova(final_eco))
-apa_table(apa_lm$table, caption = "Anova table for Reccomendation.")
+apa_table(apa_lm$table, caption = "Anova table for Ecological evaluation")
 ```
 
 ```{r, results="hide"}
-sjPlot::plot_model(final_eco)
 
-sjPlot::plot_model(final_eco, type = "pred")[2]
-sjPlot::plot_model(final_eco, type = "pred")[3]
+plot_model(final_eco)
+
+interactions::cat_plot(final_eco, pred = Product, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("A+","A++"), errorbar.width = 0.4, y.label = "Ecological Evaluation") 
+
+interactions::cat_plot(final_eco, pred = Priming, modx = Product, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), modx.labels = c("A+","A++"), errorbar.width = 0.4, y.label = "Ecological Evaluation") 
 
 ```
 
+#### Ecologic Evaluation A++
+  
+```{r lm Ecolo_EvalA+}
+base_ecoA = filter(base_eco, Product == 1)
+
+
+final_ecoA = lm(Ecolo_Eval ~ Priming*Decision_mode  + Age,  data = base_ecoA)
+
+apa_lm <- apa_print(anova(final_ecoA))
+apa_table(apa_lm$table, caption = "Anova table for Ecological evaluation only A++ product")
+```
+
+
+```{r, results="hide"}
+plot_model(final_ecoA)
+
+interactions::cat_plot(final_ecoA, pred = Priming, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), errorbar.width = 0.4, y.label = "Price Evaluation")    
+```
 $~$
 $~$
   
 ### Appendix
+
+$~$
+$~$
+
+#####  Correlation between affects towars climate chnage
+```{r clean up, echo=FALSE, message=FALSE, warning=FALSE}
+base_clean$Gender = recode_factor(base_clean$Gender, "Autre/NA" = NA_character_)
+
+ggpubr::ggscatter(base_clean, x = "negatif_affect", y = "positive_affect", position = position_jitter(w = 0.1, h = 0.1),
+                  color = "black", shape = 21, size = 3, # Points color, shape and size
+                  add = "reg.line",  # Add regressin line
+                  add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+                  conf.int = TRUE, # Add confidence interval
+                  cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+                  cor.coeff.args = list(method = "pearson", label.x = 6, label.sep = "\n")
+)
+```
+
+
+
   
 $~$
 $~$
@@ -229,7 +333,8 @@ $~$
   
 #### Model selection for price
 ```{r diag lm MSprice, echo=FALSE, message=FALSE, warning=FALSE}
-modprice = lm(Price ~ Priming*Product*Behav_enviro + Priming*Product*Decision_mode + Priming*Product*Age, data = base_clean)
+modprice = lm(Price ~ Priming*Product*negatif_affect + Priming*Product*positive_affect + Priming*Product*Decision_mode + Priming*Product*Age, data = base_clean)
+
 
 MS = MASS::stepAIC(modprice, direction = "both", trace = FALSE)
 
@@ -249,7 +354,7 @@ $~$
 #### Price: Diagnostics Plots for linear model 
   
 ```{r diag lm Price2, echo=FALSE, results='hide',  fig.show="hold", out.width="50%"}
-modprice = lm(Price ~ Priming + Product + Behav_enviro + Age + Priming:Product, data = base_price)
+modprice = lm(Price ~ Priming + Product  + Age + Priming:Product, data = base_price)
 
 plot(modprice, c(1:2,4), labels.id = base_price$id)
 sjPlot::plot_model(modprice, type="diag")[[3]]
@@ -261,7 +366,7 @@ $~$
 #### Model selection for Probality to buy
 ```{r diag lm MSbuy, echo=FALSE, message=FALSE, warning=FALSE}
 
-modbuy = lm(Buy ~ Priming*Product*Behav_enviro + Priming*Product*Decision_mode + Priming*Product*Age, data = base_clean)
+modbuy = lm(Buy ~ Priming*Product*negatif_affect + Priming*Product*positive_affect + Priming*Product*Decision_mode + Priming*Product*Age, data = base_clean)
 
 MS = MASS::stepAIC(modbuy, direction = "both", trace = FALSE)
 
@@ -281,7 +386,7 @@ $~$
   
 #### Probability to buy: Diagnostics Plots for linear model  
 ```{r diag lm Buy2, echo=FALSE, results="hide", fig.show="hold", out.width="50%"}
-modbuy = lm(Buy ~ Product*Priming + Behav_enviro + Age + Product:Behav_enviro, data = base_buy)
+modbuy = lm(Buy ~ Product*Priming  + Age + Product:Behav_enviro, data = base_buy)
 
 plot(modbuy, c(1:2,4), labels.id = base_buy$id)
 sjPlot::plot_model(modbuy, type="diag")[[3]]
@@ -293,7 +398,7 @@ $~$
 #### Model selection for Reccomendation
 ```{r diag lm MSrecco, echo=FALSE, message=FALSE, warning=FALSE}
 
-modrecco = lm(Reccomend ~ Priming*Product*Behav_enviro + Priming*Product*Decision_mode + Priming*Product*Age, data = base_clean)
+modrecco = lm(Reccomend ~ Priming*Product*negatif_affect + Priming*Product*positive_affect + Priming*Product*Decision_mode + Priming*Product*Age, data = base_clean)
 
 MS = MASS::stepAIC(modrecco, direction = "both", trace = FALSE)
 
@@ -313,7 +418,7 @@ $~$
   
 #### Reccomendation: Diagnostics Plots for linear model AFTER
 ```{r diag lm Recco2, echo=FALSE, results="hide", fig.show="hold", out.width="50%"}
-modrecco = lm(Reccomend ~ Priming*Product + Behav_enviro + Product:Behav_enviro, data = base_recco)
+modrecco = lm(Reccomend ~ Priming*Product  + Product:Behav_enviro, data = base_recco)
 
 plot(modrecco, c(1:2,4), labels.id = base_recco$id)
 sjPlot::plot_model(modrecco, type="diag")[[3]]
@@ -325,7 +430,7 @@ $~$
 
 #### Model selection for Ecologic Evaluation
 ```{r diag lm MSeco, echo=FALSE, message=FALSE, warning=FALSE}
-modeco = lm(Ecolo_Eval ~ Priming*Product*Behav_enviro + Priming*Product*Decision_mode + Priming*Product*Age, data = base_clean)
+modeco = lm(Ecolo_Eval ~ Priming*Product*negatif_affect + Priming*Product*positive_affect + Priming*Product*Decision_mode + Priming*Product*Age, data = base_clean)
 
 MS = MASS::stepAIC(modeco, direction = "both", trace = FALSE)
 
@@ -344,7 +449,7 @@ $~$
   
 #### Ecologic Evaluation: Diagnostics Plots for linear model AFTER
 ```{r diag lm EcoEval, echo=FALSE, results="hide", fig.show="hold", out.width="50%"}
-modeco = lm(Ecolo_Eval ~ Priming*Product*Decision_mode + Behav_enviro + Priming*Product*Age, data = base_eco)
+modeco = lm(Ecolo_Eval ~ Priming*Product*Decision_mode  + Priming*Product*Age, data = base_eco)
 
 plot(modeco, c(1:2,4), labels.id = base_eco$id)
 sjPlot::plot_model(modeco, type="diag")[[3]]
