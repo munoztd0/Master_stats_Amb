@@ -1,4 +1,4 @@
----
+  ---
 title: "ANALYSIS REPORT"
 author: "Ambroise"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
@@ -74,7 +74,18 @@ Blabla
 base[c("Age", "Gender", "Profession")] %>%  tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})", all_categorical() ~ "{n} / {N} ({p}%)"),)  %>% modify_caption("**Table 1. Demographics **") %>%
   bold_labels()
 
-base_clean[c("Decision Mode")] %>%  tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})", all_categorical() ~ "{n} / {N} ({p}%)"),)   %>% modify_caption("**Table 2. Decision Mode **") %>%
+base[c("Decision Mode")] %>%  tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})", all_categorical() ~ "{n} / {N} ({p}%)"),)   %>% modify_caption("**Table 2. Decision Mode **") %>%
+  bold_labels()
+```
+$~$
+$~$
+
+
+```{r demographics_clean}
+base_clean[c("Age", "Gender", "Profession")] %>%  tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})", all_categorical() ~ "{n} / {N} ({p}%)"),)  %>% modify_caption("**Table 3. Demographics after cleaning**") %>%
+  bold_labels()
+
+base_clean[c("Decision Mode")] %>%  tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})", all_categorical() ~ "{n} / {N} ({p}%)"),)   %>% modify_caption("**Table 4. Decision Mode after cleaning**") %>%
   bold_labels()
 ```
 $~$
@@ -91,7 +102,7 @@ $~$
 ```{r lm Price}
 base_price = base_clean #no huge outliers, see appendix
 
-final_price = lm(Price ~ Priming*Product + Age + Decision_mode + Priming*Product + Product*negatif_affect + Product*positive_affect,  data = base_price)
+final_price = lm(Price ~ Priming*Product + Age + Decision_mode + Priming*Product + Priming*Product*negatif_affect + Product*positive_affect,  data = base_price)
 
 apa_lm <- apa_print(anova(final_price))
 apa_table(apa_lm$table,  caption = "Anova table for Price.")
@@ -184,7 +195,7 @@ $~$
 ```{r lm Recco}
 base_recco = base_clean #no huge outliers, see appendix
 
-final_recco = lm(Reccomend ~ Priming*Product  + Age + Decision_mode + Priming*Product + Product*negatif_affect + Product*positive_affect,  data = base_recco)
+final_recco = lm(Reccomend ~ Priming*Product  + Age + Decision_mode + Priming*Product + Product*negatif_affect + Product*Priming*positive_affect,  data = base_recco)
 
 apa_lm <- apa_print(anova(final_recco))
 apa_table(apa_lm$table,  caption = "Anova table for Reccomendation.")
@@ -285,7 +296,7 @@ $~$
 $~$
 
 #####  Correlation between affects towars climate chnage
-```{r clean up, echo=FALSE, message=FALSE, warning=FALSE}
+```{r corr, echo=FALSE, message=FALSE, warning=FALSE}
 base_clean$Gender = recode_factor(base_clean$Gender, "Autre/NA" = NA_character_)
 
 ggpubr::ggscatter(base_clean, x = "negatif_affect", y = "positive_affect", position = position_jitter(w = 0.1, h = 0.1),
@@ -298,8 +309,26 @@ ggpubr::ggscatter(base_clean, x = "negatif_affect", y = "positive_affect", posit
 )
 ```
 
+$~$
+$~$
 
+#####  Score of Affect towards climate change
+```{r score, echo=FALSE, message=FALSE, warning=FALSE}
+base_clean$score = -base_clean$negatif_affect
+base_clean$score = base_clean$score+ base_clean$positive_affect
 
+#todo
+  
+```
+
+#####  Affect frequency between condition
+```{r score, echo=FALSE, message=FALSE, warning=FALSE}
+# base_clean$score = -base_clean$negatif_affect
+# base_clean$score = base_clean$score+ base_clean$positive_affect
+
+#todo
+  
+```
   
 $~$
 $~$
@@ -458,7 +487,46 @@ sjPlot::plot_model(modeco, type="diag")[[3]]
 $~$
 $~$
   
+#### Density Plots 
 
+$~$
+$~$
+  
+Hollistic (Positive) Affect Towards Climate Change
+
+$~$
+$~$
+
+```{r}
+
+plotNormalHistogram(base_clean$positive_affect, main = "Positive Affect", sub = paste("skewness =", skewness(base_clean$positive_affect, na.rm = TRUE))) 
+
+```
+
+
+$~$
+$~$
+
+We see a strong right skew of the dristribution.
+
+$~$
+$~$
+
+Hollistic (Negative) Affect Towards Climate Change
+
+$~$
+$~$
+
+```{r}
+
+plotNormalHistogram(base_clean$negatif_affect, main = "Negative Affect", sub = paste("skewness =", skewness(base_clean$negatif_affect, na.rm = TRUE))) 
+
+```
+
+$~$
+$~$
+
+We see a slight left skew of the dristribution.
 
 ```{r}
 report::report_packages()
