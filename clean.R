@@ -1,7 +1,7 @@
 #----clean----
 
 #garde participant.es qui ont 1) fini 2 et 3) accepter les conditions
-data_ambroise = filter(data_ambroise_full, Finished == 1 & Q2.4_1 == 1 & Q2.3_2 == 1)
+data_ambroise = dplyr::filter(data_ambroise_full, Finished == 1 & Q2.4_1 == 1 & Q2.3_2 == 1)
 
 #change NA par 0 pour les FL_2*_DO_* variables
 data_ambroise[136:138][is.na(data_ambroise[136:138])] <- 0
@@ -36,7 +36,8 @@ base$`Decision Mode` = as.factor(base$Decision_mode); levels(base$`Decision Mode
 #   bold_labels()
 
 #mettre en facteur Priming, Product et Decision mode
-base$Priming = as.factor(base$Priming); base$Product = as.factor(base$Product); 
+base$Priming = as.factor(base$Priming);  levels(base$Priming) <- c("Calculation", "Affective") 
+base$Product = as.factor(base$Product);  levels(base$Product) <- c("A+", "A++") 
 base$Decision_mode = as.factor(base$Decision_mode)
 
 
@@ -64,9 +65,9 @@ base_clean %>%
   ggcorr(palette = "RdBu", label = TRUE)
 
 #plot all
-base_clean %>%
-  keep(is.numeric) %>%
-  ggpairs()
+# base_clean %>%
+#   keep(is.numeric) %>%
+#   ggpairs()
 
 plot(base_clean$Behav_enviro, base_clean$Age)
 
@@ -83,6 +84,7 @@ x = transform(as.matrix(base_clean[c("Reccomend" ,     "Buy", "Ecolo_Eval",   "n
 
 base_clean = filter(base, id %notin% c("13288", "13570", "13006", "10930", "12811", "10945","13627"))
 
-
-
+# Score of Affect towards climate change
+base_clean$score = -base_clean$negatif_affect
+base_clean$score = base_clean$score+ base_clean$positive_affect
 

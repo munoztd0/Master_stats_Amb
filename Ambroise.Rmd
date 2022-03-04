@@ -1,4 +1,4 @@
-  ---
+---
 title: "ANALYSIS REPORT"
 author: "Ambroise"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
@@ -20,19 +20,19 @@ repro:
 ---
 
 ### Setup {-}
-  
-```{r setup, results='hide', message=FALSE, warning=FALSE}
+
+```{r setup , results='hide', message=FALSE, warning=FALSE}
 
 library(repro)
-# load packages from yaml header
-automate_load_packages()
-# include external scripts
-automate_load_scripts()
+# # load packages from yaml header
+# automate_load_packages()
+# # include external scripts
+# automate_load_scripts()
 
 # load data
-data_ambroise_full  <- automate_load_data(data_ambroise_full, read_sav)
+data_ambroise_full   <- haven::read_sav("Enquete_Ambroise.sav")
 
-
+pacman::p_load(papaja, tinylabels, apaTables, haven, ggplot2,  tidyverse, gtsummary, car, GGally, MASS, matrixStats, rcompanion, moments, utils, sjPlot, interactions, kableExtra)
 
 sessio = sessionInfo(); #opts_chunk$set(echo = F, message=F, warning=F) # set echo F for all
 
@@ -63,6 +63,7 @@ set.seed(666) #set random seed
 
 
 ```{r clean, include=FALSE,  cache = TRUE}
+source('~/DISK/Proj/Ambroise/clean.R', echo=F)
 # this chunk runs clean.R (listed in the YAML) which does all the preprocessing
 ```
 
@@ -102,7 +103,7 @@ $~$
 ```{r lm Price}
 base_price = base_clean #no huge outliers, see appendix
 
-final_price = lm(Price ~ Priming*Product + Age + Decision_mode + Priming*Product + Priming*Product*negatif_affect + Product*positive_affect,  data = base_price)
+final_price = lm(Price ~ Priming*Product*score + Age + Decision_mode,  data = base_price)
 
 apa_lm <- apa_print(anova(final_price))
 apa_table(apa_lm$table,  caption = "Anova table for Price.")
@@ -114,10 +115,10 @@ plot_model(final_price)
 
 interactions::cat_plot(final_price, pred = Priming, modx = Product, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), modx.labels = c("A+","A++"), errorbar.width = 0.4, y.label = "Price Evaluation")   
 
-interactions::interact_plot(final_price, pred = positive_affect, modx = Product, interval = TRUE, plot.points = T, point.alpha =0.3, modx.labels = c("A+","A++"), x.label = "Positive affect towards climate change", y.label = "Price Evaluation")    
+interactions::interact_plot(final_price, pred = score, modx = Priming, interval = TRUE, plot.points = T, point.alpha =0.3, x.label = "Affective Score towards climate change", y.label = "Price Evaluation")    
 
 
-interactions::interact_plot(final_price, pred = positive_affect, modx = Product, interval = TRUE, plot.points = F, point.alpha =0.3, modx.labels = c("A+","A++"), x.label = "Positive affect towards climate change", y.label = "Price Evaluation")    
+interactions::interact_plot(final_price, pred = score, modx = Priming, interval = TRUE, plot.points = F, point.alpha =0.3, x.label = "Affective Score towards climate change", y.label = "Price Evaluation")    
 
 ```
 $~$
@@ -130,30 +131,13 @@ $~$
 
 
 
-#### Price A++
-```{r lm PriceA+}
-base_priceA = filter(base_price, Product == 1)
-
-final_priceA = lm(Price ~ Priming*Decision_mode + Age,  data = base_priceA)
-
-apa_lm <- apa_print(anova(final_priceA))
-apa_table(apa_lm$table,  caption = "Anova table for Price with only A++ product.")
-```
-
-```{r, results="hide"}
-plot_model(final_priceA)
-
-interactions::cat_plot(final_priceA, pred = Priming, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), errorbar.width = 0.4, y.label = "Price Evaluation")    
-```
-
-
 
 #### Probability to buy
 ```{r lm Buy}
 base_buy = filter(base_clean, id %notin% c("13804")) #remove huge outliers, see appendix
 
 
-final_buy = lm(Buy ~ Priming*Product + Age + Decision_mode + Priming*Product + Product*negatif_affect + Product*positive_affect,  data = base_buy, y.label = "Probability to buy")   
+final_buy = lm(Buy ~ Priming*Product*score + Age + Decision_mode,  data = base_buy)   
 
 apa_lm <- apa_print(anova(final_buy))
 apa_table(apa_lm$table,  caption = "Anova table for Probability to buy.")
@@ -172,22 +156,6 @@ interactions::cat_plot(final_buy, pred = Priming, modx = Product, interval = TRU
 
 
 
-#### Probability to buy A++
-```{r lm BuyA}
-base_buyA = filter(base_buy, Product == 1)
-
-final_buyA = lm(Buy ~ Priming*Decision_mode + Age ,  data = base_buyA)
-
-apa_lm <- apa_print(anova(final_buyA))
-apa_table(apa_lm$table,  caption = "Anova table for Probability to buy only A++ product.")
-```
-
-```{r, results="hide"}
-plot_model(final_buyA)
-
-interactions::cat_plot(final_buyA, pred = Priming, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), errorbar.width = 0.4, y.label = "Probability to buy")   
-```
-
 $~$
 $~$
 
@@ -195,7 +163,8 @@ $~$
 ```{r lm Recco}
 base_recco = base_clean #no huge outliers, see appendix
 
-final_recco = lm(Reccomend ~ Priming*Product  + Age + Decision_mode + Priming*Product + Product*negatif_affect + Product*Priming*positive_affect,  data = base_recco)
+final_recco = lm(Reccomend ~ Priming*Product*score + Decision_mode + Age,  data = base_recco)
+      
 
 apa_lm <- apa_print(anova(final_recco))
 apa_table(apa_lm$table,  caption = "Anova table for Reccomendation.")
@@ -207,24 +176,114 @@ plot_model(final_recco)
 
 interactions::cat_plot(final_recco, pred = Product, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("A+","A++"), errorbar.width = 0.4, y.label = "Reccomendation to buy")  
 
-sjPlot::plot_model(final_recco, type = "pred", show.data = T)[5]
+# sjPlot::plot_model(final_recco, type = "pred", show.data = T)[5]
 
 interactions::cat_plot(final_recco, pred = Priming, modx = Product, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), modx.labels = c("A+","A++"), errorbar.width = 0.4, y.label = "Reccomendation to buy")  
 
-interactions::interact_plot(final_recco, pred = negatif_affect, modx = Product, interval = TRUE, plot.points = T, point.alpha =0.3, modx.labels = c("A+","A++"), x.label = "Negative affect towards climate change", y.label = "Reccomendation to buy")  
-
-interactions::interact_plot(final_recco, pred = negatif_affect, modx = Product, interval = TRUE, plot.points = F, point.alpha =0.3, modx.labels = c("A+","A++"), x.label = "Negative affect towards climate change", y.label = "Reccomendation to buy") 
+# interactions::interact_plot(final_recco, pred = negatif_affect, modx = Product, interval = TRUE, plot.points = T, point.alpha =0.3, modx.labels = c("A+","A++"), x.label = "Negative affect towards climate change", y.label = "Reccomendation to buy")  
+# 
+# interactions::interact_plot(final_recco, pred = negatif_affect, modx = Product, interval = TRUE, plot.points = F, point.alpha =0.3, modx.labels = c("A+","A++"), x.label = "Negative affect towards climate change", y.label = "Reccomendation to buy") 
 ```
 $~$
 $~$
 
-negatif_affect barely significatif and doesn't look very informative by itself mais l'interaction mest plus interessante (avec et sans les points pour que ce soit plus digeste)
-  
-$~$
-$~$
-Example for reporting :\
+<!-- negatif_affect barely significatif and doesn't look very informative by itself mais l'interaction mest plus interessante (avec et sans les points pour que ce soit plus digeste) -->
 
-Product (`r apa_lm$full_result$Product`) and Negative affect towards climate change (`r apa_lm$full_result$negatif_affect`) affected reccomendation. However, the effect of Behav_enviro differed by Product, `r apa_lm$full_result$Product_negatif_affect`.
+<!-- $~$ -->
+<!-- $~$ -->
+<!-- Example for reporting :\ -->
+
+<!-- Product (`r apa_lm$full_result$Product`) and Negative affect towards climate change (`r apa_lm$full_result$negatif_affect`) affected reccomendation. However, the effect of Behav_enviro differed by Product, `r apa_lm$full_result$Product_negatif_affect`. -->
+
+
+
+  
+#### Ecologic Evaluation
+  
+  
+```{r lm Ecolo_Eval}
+
+base_eco = filter(base_clean, id %notin% c("13594", "11200", "13804", "12529", "11017")) #remove huge outliers, see appendix
+
+final_eco = lm(Ecolo_Eval ~ Priming*Product*score  + Age + Decision_mode,  data = base_eco)
+
+apa_lm <- apa_print(anova(final_eco))
+apa_table(apa_lm$table, caption = "Anova table for Ecological evaluation")
+```
+
+```{r, results="hide"}
+
+plot_model(final_eco)
+
+interactions::cat_plot(final_eco, pred = Product, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("A+","A++"), errorbar.width = 0.4, y.label = "Ecological Evaluation") 
+
+interactions::cat_plot(final_eco, pred = Priming, modx = Product, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), modx.labels = c("A+","A++"), errorbar.width = 0.4, y.label = "Ecological Evaluation") 
+
+```
+
+
+$~$
+$~$
+
+### Appendix
+
+$~$
+$~$
+
+
+#### Plot All
+
+```{r plot all}
+base_clean %>%
+   keep(is.numeric) %>%
+   ggpairs()
+```
+$~$
+$~$
+
+Check variables densities -> Positive and negative are not really good: to skewed. Score is quite better.¨
+
+$~$
+$~$
+
+#### Price A++
+```{r lm PriceA+}
+base_priceA = filter(base_price, Product == 1)
+
+final_priceA = lm(Price ~ Priming*Decision_mode + Age,  data = base_priceA)
+
+apa_lm <- apa_print(anova(final_priceA))
+apa_table(apa_lm$table,  caption = "Anova table for Price with only A++ product.")
+```
+
+```{r, results="hide"}
+plot_model(final_priceA)
+
+interactions::cat_plot(final_priceA, pred = Priming, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), errorbar.width = 0.4, y.label = "Price Evaluation")    
+```
+
+$~$
+$~$
+
+#### Probability to buy A++
+```{r lm BuyA}
+base_buyA = filter(base_buy, Product == 1)
+
+final_buyA = lm(Buy ~ Priming*Decision_mode + Age ,  data = base_buyA)
+
+apa_lm <- apa_print(anova(final_buyA))
+apa_table(apa_lm$table,  caption = "Anova table for Probability to buy only A++ product.")
+```
+
+
+```{r, results="hide"}
+plot_model(final_buyA)
+
+interactions::cat_plot(final_buyA, pred = Priming, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), errorbar.width = 0.4, y.label = "Probability to buy")   
+```
+
+$~$
+$~$
 
 
 #### Reccomendation A++
@@ -245,29 +304,6 @@ interactions::cat_plot(final_reccoA, pred = Priming, interval = TRUE, plot.point
 
 $~$
 $~$
-  
-#### Ecologic Evaluation
-  
-  
-```{r lm Ecolo_Eval}
-
-base_eco = filter(base_clean, id %notin% c("13594", "11200", "13804", "12529", "11017")) #remove huge outliers, see appendix
-
-final_eco = lm(Ecolo_Eval ~ Priming*Product  + Age + Decision_mode + Priming*Product + Product*negatif_affect + Product*positive_affect,  data = base_eco)
-
-apa_lm <- apa_print(anova(final_eco))
-apa_table(apa_lm$table, caption = "Anova table for Ecological evaluation")
-```
-
-```{r, results="hide"}
-
-plot_model(final_eco)
-
-interactions::cat_plot(final_eco, pred = Product, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("A+","A++"), errorbar.width = 0.4, y.label = "Ecological Evaluation") 
-
-interactions::cat_plot(final_eco, pred = Priming, modx = Product, interval = TRUE, plot.points = T, point.alpha =0.3, pred.labels = c("Calculation","Affective"), modx.labels = c("A+","A++"), errorbar.width = 0.4, y.label = "Ecological Evaluation") 
-
-```
 
 #### Ecologic Evaluation A++
   
@@ -289,13 +325,9 @@ interactions::cat_plot(final_ecoA, pred = Priming, interval = TRUE, plot.points 
 ```
 $~$
 $~$
-  
-### Appendix
 
-$~$
-$~$
 
-#####  Correlation between affects towars climate chnage
+####  Correlation between affects towars climate chnage
 ```{r corr, echo=FALSE, message=FALSE, warning=FALSE}
 base_clean$Gender = recode_factor(base_clean$Gender, "Autre/NA" = NA_character_)
 
@@ -312,24 +344,129 @@ ggpubr::ggscatter(base_clean, x = "negatif_affect", y = "positive_affect", posit
 $~$
 $~$
 
-#####  Score of Affect towards climate change
-```{r score, echo=FALSE, message=FALSE, warning=FALSE}
-base_clean$score = -base_clean$negatif_affect
-base_clean$score = base_clean$score+ base_clean$positive_affect
+#### Test frequencies between priming groups (Positive affect)
+```{r glm, echo=FALSE, message=FALSE, warning=FALSE}
 
-#todo
-  
+base_clean[c("positive_affect", "Priming")] %>%  tbl_summary(by=positive_affect)  %>% modify_caption("**Summary statistics**") %>% bold_labels() %>%
+  add_p() %>% bold_labels()
 ```
 
-#####  Affect frequency between condition
-```{r score, echo=FALSE, message=FALSE, warning=FALSE}
-# base_clean$score = -base_clean$negatif_affect
-# base_clean$score = base_clean$score+ base_clean$positive_affect
+$~$
+$~$
 
-#todo
-  
+#### Test frequencies between priming groups (Negative affect)
+```{r frq, echo=FALSE, message=FALSE, warning=FALSE}
+
+base_clean[c("negatif_affect", "Priming")] %>%  tbl_summary(by=negatif_affect)  %>% modify_caption("**Summary statistics**") %>% bold_labels() %>%
+  add_p(test.args = "Priming" ~ list(workspace=2e9)) %>% bold_labels()
 ```
-  
+
+$~$
+$~$
+
+####  Logistic regression to predict priming groups (Positive affect)
+```{r glm1, echo=FALSE, message=FALSE, warning=FALSE}
+
+m1 <- glm(
+    data = base_clean,
+    Priming ~ positive_affect,
+    family = binomial)
+
+apa_lm <- apa_print(m1)
+# Delete the "(Intercept)" line:
+apa_lm$table <- apa_lm$table[-1, ]
+apa_table(apa_lm$table)
+
+p1 <- ggplot(base_clean, aes(x = positive_affect, y = as.numeric(as.character(Priming)))) +
+    geom_point(colour = "red", alpha = 0.5) +
+    stat_smooth(method = "glm", se = TRUE, method.args = list(family = binomial)) +
+    labs(x = "Positive Affect", y = "Priming Probability", tag = "a") +
+    theme_light() +
+    theme(
+        plot.tag = element_text(),
+        axis.title = element_text(size = 7, face = "bold")
+    )
+```
+
+$~$
+$~$
+
+```{r, fig.show="hold", out.width="50%", echo=FALSE, message=FALSE, warning=FALSE}
+p1
+```
+
+$~$
+$~$
+
+####  Logistic regression to predict priming groups (Negative affect)
+```{r glm2, echo=FALSE, message=FALSE, warning=FALSE}
+
+m2 <- glm(
+    data = base_clean,
+    Priming ~ negatif_affect,
+    family = binomial
+  )
+
+apa_lm <- apa_print(m2)
+# Delete the "(Intercept)" line:
+apa_lm$table <- apa_lm$table[-1, ]
+apa_table(apa_lm$table)
+
+
+p2 <- ggplot(base_clean, aes(x = negatif_affect, y = as.numeric(as.character(Priming)))) +
+    geom_point(colour = "red", alpha = 0.5) +
+    stat_smooth(method = "glm", se = TRUE, method.args = list(family = binomial)) +
+    labs(x = "Negative Affect", y = "Priming Probability", tag = "a") +
+    theme_light() +
+    theme(
+        plot.tag = element_text(),
+        axis.title = element_text(size = 7, face = "bold")
+    )
+
+```
+
+$~$
+$~$
+
+```{r, fig.show="hold", out.width="50%", echo=FALSE, message=FALSE, warning=FALSE}
+p2
+```
+$~$
+$~$
+
+####  Logistic regression to predict priming groups (Affective Score)
+```{r glm3, echo=FALSE, message=FALSE, warning=FALSE}
+
+m3 <- glm(
+    data = base_clean,
+    Priming ~ score,
+    family = binomial
+  )
+
+apa_lm <- apa_print(m3)
+# Delete the "(Intercept)" line:
+apa_lm$table <- apa_lm$table[-1, ]
+apa_table(apa_lm$table)
+
+
+p3 <- ggplot(base_clean, aes(x = score, y = as.numeric(as.character(Priming)))) +
+    geom_point(colour = "red", alpha = 0.5) +
+    stat_smooth(method = "glm", se = TRUE, method.args = list(family = binomial)) +
+    labs(x = "Affective Score", y = "Priming Probability", tag = "a") +
+    theme_light() +
+    theme(
+        plot.tag = element_text(),
+        axis.title = element_text(size = 7, face = "bold")
+    )
+
+```
+
+$~$
+$~$
+
+```{r, fig.show="hold", out.width="50%", echo=FALSE, message=FALSE, warning=FALSE}
+p3
+```
 $~$
 $~$
   
@@ -487,22 +624,16 @@ sjPlot::plot_model(modeco, type="diag")[[3]]
 $~$
 $~$
   
-#### Density Plots 
-
-$~$
-$~$
   
-Hollistic (Positive) Affect Towards Climate Change
+  
+##### Hollistic (Positive) Affect Towards Climate Change
 
-$~$
-$~$
 
 ```{r}
 
-plotNormalHistogram(base_clean$positive_affect, main = "Positive Affect", sub = paste("skewness =", skewness(base_clean$positive_affect, na.rm = TRUE))) 
+plotNormalHistogram(base_clean$positive_affect, main = "Negative Affect", sub = paste("skewness =", skewness(base_clean$negatif_affect, na.rm = TRUE))) 
 
 ```
-
 
 $~$
 $~$
@@ -512,10 +643,8 @@ We see a strong right skew of the dristribution.
 $~$
 $~$
 
-Hollistic (Negative) Affect Towards Climate Change
+##### Hollistic (Negative) Affect Towards Climate Change
 
-$~$
-$~$
 
 ```{r}
 
