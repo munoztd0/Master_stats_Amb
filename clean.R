@@ -36,7 +36,7 @@ base$`Decision Mode` = as.factor(base$Decision_mode); levels(base$`Decision Mode
 #   bold_labels()
 
 #mettre en facteur Priming, Product et Decision mode
-base$Priming = as.factor(base$Priming);  levels(base$Priming) <- c("Calculation", "Affective") 
+base$Priming = as.factor(base$Priming);  levels(base$Priming) <- c("Computational", "Affective") 
 base$Product = as.factor(base$Product);  levels(base$Product) <- c("A+", "A++") 
 base$Decision_mode = as.factor(base$Decision_mode)
 
