@@ -1,6 +1,6 @@
 ---
 title: "ANALYSIS REPORT"
-author: "Ambroise"
+author: "Master"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   html_document:  
@@ -13,7 +13,7 @@ output:
     extra_dependencies: ["float"]
 repro:
   data:
-    data_ambroise_full: Enquete_Ambroise.sav
+    data_Master_full: Enquete_Master.sav
     
   packages: [ aaronpeikert/repro@devel, crsh/papaja@devel, tinylabels, apaTables, haven, ggplot2,  tidyverse, gtsummary, car, GGally, MASS, matrixStats, rcompanion, moments, utils, sjPlot, interactions, kableExtra]
   scripts: clean.R
@@ -30,7 +30,7 @@ library(repro)
 # automate_load_scripts()
 
 # load data
-data_ambroise_full   <- haven::read_sav("Enquete_Ambroise.sav")
+data_Master_full   <- haven::read_sav("Enquete_Master.sav")
 
 pacman::p_load(papaja, tinylabels, apaTables, haven, ggplot2,  tidyverse, gtsummary, car, GGally, MASS, matrixStats, rcompanion, moments, utils, sjPlot, interactions, kableExtra)
 
@@ -63,7 +63,9 @@ set.seed(666) #set random seed
 
 
 ```{r clean, include=FALSE,  cache = TRUE}
-source('~/DISK/Proj/Ambroise/clean.R', echo=F)
+path=here::here()
+setwd(path)
+source('./clean.R', echo=F)
 # this chunk runs clean.R (listed in the YAML) which does all the preprocessing
 ```
 

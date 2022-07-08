@@ -7,7 +7,7 @@ pacman::p_load(crsh/papaja@devel, tinylabels, apaTables, haven, ggplot2,  tidyve
 
 
 #get relative path
-path =  here("Ambroise") #this is really important ! you juste need to put the name of YOUR folder and here() will find the relative path for you ! 
+path =  here("Master") #this is really important ! you juste need to put the name of YOUR folder and here() will find the relative path for you ! 
 #or path =  dirname(rstudioapi::getActiveDocumentContext()$path) in R
 setwd(path) #set working directory
 

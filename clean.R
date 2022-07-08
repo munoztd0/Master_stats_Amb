@@ -1,19 +1,19 @@
 #----clean----
 
 #garde participant.es qui ont 1) fini 2 et 3) accepter les conditions
-data_ambroise = dplyr::filter(data_ambroise_full, Finished == 1 & Q2.4_1 == 1 & Q2.3_2 == 1)
+data_Master = dplyr::filter(data_Master_full, Finished == 1 & Q2.4_1 == 1 & Q2.3_2 == 1)
 
 #change NA par 0 pour les FL_2*_DO_* variables
-data_ambroise[136:138][is.na(data_ambroise[136:138])] <- 0
+data_Master[136:138][is.na(data_Master[136:138])] <- 0
 
 #double check que le script a bien fait son boulot
-data_ambroise$checkA = ifelse(data_ambroise$FL_24_DO_AffectivePriming == data_ambroise$Priming, 1, 0)
-data_ambroise$checkB = ifelse(data_ambroise$FL_24_DO_ComputationalPriming != data_ambroise$Priming, 1, 0)
-data_ambroise$checkC = ifelse(data_ambroise$FL_27_DO_EvaluationA != data_ambroise$Product, 1, 0)
-mean(data_ambroise$checkA) + mean(data_ambroise$checkB) + mean(data_ambroise$checkC) == 3
+data_Master$checkA = ifelse(data_Master$FL_24_DO_AffectivePriming == data_Master$Priming, 1, 0)
+data_Master$checkB = ifelse(data_Master$FL_24_DO_ComputationalPriming != data_Master$Priming, 1, 0)
+data_Master$checkC = ifelse(data_Master$FL_27_DO_EvaluationA != data_Master$Product, 1, 0)
+mean(data_Master$checkA) + mean(data_Master$checkB) + mean(data_Master$checkC) == 3
 
 
-base  <- subset(data_ambroise, select= c("Priming",  "Reccomend", "Product", "Prix", "ProbabilitéACHAT", "EcologiqueEVAL", "Duration__in_seconds_", "id", "Q10.1", "Q12.1",  "Q12.2", "ComportementEnvironmental", "Q14.2", "Q14.3", "Q14.4", "Q14.5"))
+base  <- subset(data_Master, select= c("Priming",  "Reccomend", "Product", "Prix", "ProbabilitéACHAT", "EcologiqueEVAL", "Duration__in_seconds_", "id", "Q10.1", "Q12.1",  "Q12.2", "ComportementEnvironmental", "Q14.2", "Q14.3", "Q14.4", "Q14.5"))
 
 colnames(base) <- c("Priming",  "Reccomend", "Product", "Price", "Buy", "Ecolo_Eval", "Time", "id", "Decision_mode", "negatif_affect",  "positive_affect", "Behav_enviro", "Age", "Gender", "Profession", "commentaires")
 
