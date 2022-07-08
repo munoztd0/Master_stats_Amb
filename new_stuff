@@ -1,11 +1,15 @@
 old stuff:
 
-- prming computatonelle bleu chamge
-- description du score ocmment on la calculer 
-- plot age probbilty buuy 
-- produit X score 
-- corr climate "change' 
-- price diag plot after
-- comment citer les infos stats
+- (done) prming computatonelle bleu chamge
+- (done) description du score ocmment on la calculer 
+- (done) plot age probbilty buuy 
+- (done) produit X score 
+- (done) corr climate "change' 
+- (todo) price diag plot after
+- (done) comment citer les infos stats
 
 new stuff:
+
+- repare A++ models!
+- price diag plot after
+- post hoc tests

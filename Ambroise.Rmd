@@ -126,7 +126,7 @@ $~$
 
 Example for reporting :\
 
-The priming condition (`r apa_lm$full_result$Priming`) and the affective score towards climate change (`r apa_lm$full_result$Behav_enviro`) did not affect price evaluation by themselves. However, the effect of affective score towards climate change on the price evalution slightly differed by priming condition, `r apa_lm$full_result$Priming_score`.
+The priming condition (`r apa_lm$full_result$Priming`) and the affective score towards climate change (`r apa_lm$full_result$score`) did not affect price evaluation by themselves. However, the effect of affective score towards climate change on the price evalution slightly differed by priming condition, `r apa_lm$full_result$Priming_score`.
 
 $~$
 
@@ -238,7 +238,9 @@ $~$
 $~$
 
 #### Score of Affect towards climate change
-score = -negatif_affect
+$~$
+score = -negatif_affect 
+$~$
 score = score+positive_affect
 
 $~$
